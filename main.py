@@ -58,7 +58,6 @@ def home():
 def edit(movie_id):
     movie_form = MovieForm()
     movie_to_update = Movie.query.get(movie_id)
-    movie_to_update.title
     if movie_form.validate_on_submit():
         try:
             is_string = False
@@ -72,6 +71,15 @@ def edit(movie_id):
         if is_string:
             return render_template("edit.html", movie_form=movie_form, movie=movie_to_update)
     return render_template("edit.html", movie_form=movie_form, movie=movie_to_update)
+
+
+@app.route("/delete/<int:movie_id>", methods=['GET'])
+def delete(movie_id):
+    if request.method == 'GET':
+        movie_to_delete = Movie.query.get(movie_id)
+        db.session.delete(movie_to_delete)
+        db.session.commit()
+        return redirect(url_for('home'))
 
 
 if __name__ == '__main__':
