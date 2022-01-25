@@ -58,12 +58,20 @@ def home():
 def edit(movie_id):
     movie_form = MovieForm()
     movie_to_update = Movie.query.get(movie_id)
+    movie_to_update.title
     if movie_form.validate_on_submit():
-        movie_to_update.rating = movie_form.movie_rating.data
-        movie_to_update.review = movie_form.movie_review.data
-        db.session.commit()
-        return redirect(url_for('home'))
-    return render_template("edit.html", movie_form=movie_form)
+        try:
+            is_string = False
+            if 0 <= float(movie_form.movie_rating.data) <= 10:
+                movie_to_update.rating = movie_form.movie_rating.data
+                movie_to_update.review = movie_form.movie_review.data
+                db.session.commit()
+                return redirect(url_for('home'))
+        except ValueError:
+            is_string = True
+        if is_string:
+            return render_template("edit.html", movie_form=movie_form, movie=movie_to_update)
+    return render_template("edit.html", movie_form=movie_form, movie=movie_to_update)
 
 
 if __name__ == '__main__':
