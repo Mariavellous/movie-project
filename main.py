@@ -14,7 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 Bootstrap(app)
 
-
+API_KEY = "2dae2be14e69d38534b342165f01d738"
 #create a table in this database called "movie"
 class Movie(db.Model):
     # These are the different fields with respective limitations
@@ -80,6 +80,33 @@ def delete(movie_id):
         db.session.delete(movie_to_delete)
         db.session.commit()
         return redirect(url_for('home'))
+
+
+class AddMovieForm(FlaskForm):
+    movie_title = StringField(label="Movie Title", validators=[DataRequired()])
+    submit = SubmitField(label="Add Movie", validators=[DataRequired()])
+
+
+@app.route('/add', methods=['GET', 'POST'])
+def add():
+    addmovie_form = AddMovieForm()
+    if request.method == 'POST':
+        movie_title = addmovie_form.movie_title.data
+        parameters = {
+            "api_key": API_KEY,
+            "query": movie_title,
+        }
+        response = requests.get("https://api.themoviedb.org/3/search/movie", params=parameters)
+        response.raise_for_status()
+        data = response.json()
+        print(data)
+        return render_template("select.html", data=data)
+    return render_template("add.html", addmovie_form=addmovie_form)
+
+
+@app.route('/select')
+def select():
+    return render_template("select.html")
 
 
 if __name__ == '__main__':
