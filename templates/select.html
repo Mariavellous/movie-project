@@ -2,20 +2,25 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block styles %}
-  {{ super() }}
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,700">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,700">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {{ super() }}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,700">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 {% endblock %}
 
 {% block title %}Select Movie{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="heading">Select Movie</h1>
-  <p>
-    <a href="#"> MOVIE TITLE - MOVIE RELEASE DATE</a>
-  </p>
+    <div class="container">
+        <h1 class="heading">Select Movie</h1>
+        <p>
+            <!-- Using the data you get back from the API, you should render the select.html page and add all the movie title and year of release on to the page.  -->
+            {% for movie in data.results %}
+                <ul>
+                    <a href="#"> {{ movie.original_title }} - {{ movie.release_date }}</a>
+                </ul>
+            {% endfor %}
+        </p>
 
-</div>
+    </div>
 {% endblock %}
