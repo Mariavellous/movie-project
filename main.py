@@ -22,9 +22,9 @@ class Movie(db.Model):
     title = db.Column(db.String(250), unique=True, nullable=False)
     year = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(1000), nullable=False)
-    rating = db.Column(db.Float, nullable=False)
-    ranking = db.Column(db.Integer, nullable=False)
-    review = db.Column(db.Integer, nullable=False)
+    rating = db.Column(db.Float, nullable=True)
+    ranking = db.Column(db.Integer, nullable=True)
+    review = db.Column(db.Integer, nullable=True)
     img_url = db.Column(db.String, nullable=False)
 
 db.create_all()
@@ -52,6 +52,7 @@ def home():
     movies = Movie.query.all()
     print(movies)
     return render_template("index.html", movies=movies)
+
 
 
 @app.route("/edit/<int:movie_id>", methods=['GET', 'POST'])
@@ -98,16 +99,40 @@ def add():
         }
         response = requests.get("https://api.themoviedb.org/3/search/movie", params=parameters)
         response.raise_for_status()
-        data = response.json()
+        data = response.json()["results"]
         print(data)
         return render_template("select.html", data=data)
     return render_template("add.html", addmovie_form=addmovie_form)
 
 
-@app.route('/select')
-def select():
+@app.route('/select/<int:movie_id>', methods=['GET', 'POST'])
+def select(movie_id):
+    if request.method == 'GET':
+        # movie_id = requests.args.get("id")
+        parameters = {
+            # "movie_id": movie_id,
+            "api_key": API_KEY
+        }
+        response = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}", params=parameters)
+        response.raise_for_status()
+        data = response.json()
+        print(data)
+        # Add new movie data in the database
+        basic_img_url = "https://image.tmdb.org/t/p/w500"
+        new_movie_data = Movie(
+            title=data["original_title"],
+            year=data["release_date"].split("-")[0],
+            description=data["overview"],
+            img_url=f"{basic_img_url}{data['poster_path']}",
+        )
+        db.session.add(new_movie_data)
+        db.session.commit()
+        # title = data["original_title"]
+        # img_url = data["poster_path"]
+        # year = data["release_date"].split("-")[0]
+        # description = data["overview"]
+        return redirect(url_for('home'))
     return render_template("select.html")
-
 
 if __name__ == '__main__':
     app.run(debug=True)

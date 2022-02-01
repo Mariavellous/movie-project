@@ -15,9 +15,9 @@
         <h1 class="heading">Select Movie</h1>
         <p>
             <!-- Using the data you get back from the API, you should render the select.html page and add all the movie title and year of release on to the page.  -->
-            {% for movie in data.results %}
+            {% for movie in data %}
                 <ul>
-                    <a href="#"> {{ movie.original_title }} - {{ movie.release_date }}</a>
+                    <a href={{ url_for('select', movie_id=movie.id) }}> {{ movie.original_title }} - {{ movie.release_date }}</a>
                 </ul>
             {% endfor %}
         </p>
