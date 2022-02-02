@@ -19,7 +19,7 @@ API_KEY = "2dae2be14e69d38534b342165f01d738"
 class Movie(db.Model):
     # These are the different fields with respective limitations
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(250), unique=True, nullable=False)
+    title = db.Column(db.String(250), unique=False, nullable=False)
     year = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(1000), nullable=False)
     rating = db.Column(db.Float, nullable=True)
@@ -42,7 +42,7 @@ new_movie = Movie(
 # db.session.commit()
 
 class MovieForm(FlaskForm):
-    movie_rating = StringField(label='Your Rating Out of 10 e.g. 6.9', validators=[DataRequired()])
+    movie_rating = StringField(label='Your Rating Out of 10 e.g. 6.9', validators=[DataRequired()], render_kw={'placeholder':"None"})
     movie_review = StringField(label='Your Review', validators=[DataRequired()])
     submit = SubmitField(label='Done')
 
@@ -59,6 +59,8 @@ def home():
 def edit(movie_id):
     movie_form = MovieForm()
     movie_to_update = Movie.query.get(movie_id)
+    movie_form.movie_rating.render_kw["placeholder"] = movie_to_update.rating
+    print(movie_form.movie_rating.render_kw['placeholder'])
     if movie_form.validate_on_submit():
         try:
             is_string = False
@@ -127,11 +129,9 @@ def select(movie_id):
         )
         db.session.add(new_movie_data)
         db.session.commit()
-        # title = data["original_title"]
-        # img_url = data["poster_path"]
-        # year = data["release_date"].split("-")[0]
-        # description = data["overview"]
-        return redirect(url_for('home'))
+        # After session.commit(), you can get the rest of the attributes from the database (e.g. id, rating, review)
+        movie_id = new_movie_data.id
+        return redirect(url_for('edit', movie_id=movie_id))
     return render_template("select.html")
 
 if __name__ == '__main__':
