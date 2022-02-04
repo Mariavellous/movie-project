@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 import requests
+from sqlalchemy import asc, desc
 
 # Create a new SQLlite database with SQLAlchemy
 app = Flask(__name__)
@@ -49,8 +50,13 @@ class MovieForm(FlaskForm):
 
 @app.route("/")
 def home():
-    movies = Movie.query.all()
+    # Get ALL the movies in Movie database in DESCENDING ORDER_BY the Movie.rating
+    movies = Movie.query.order_by(desc(Movie.rating)).all()
     print(movies)
+    # loop through all the movies and rank starting from 1. Hint: There is no rank 0.
+    for i in range(len(movies)):
+        movies[i].ranking = i + 1
+    db.session.commit()
     return render_template("index.html", movies=movies)
 
 
@@ -59,8 +65,8 @@ def home():
 def edit(movie_id):
     movie_form = MovieForm()
     movie_to_update = Movie.query.get(movie_id)
+    # change the movie_rating placeholder to previous rating of movie_to_update
     movie_form.movie_rating.render_kw["placeholder"] = movie_to_update.rating
-    print(movie_form.movie_rating.render_kw['placeholder'])
     if movie_form.validate_on_submit():
         try:
             is_string = False
